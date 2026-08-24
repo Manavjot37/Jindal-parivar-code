@@ -1,0 +1,45 @@
+SENTINELTRACE V2 — PROPOSED PRODUCTION ARCHITECTURE
+
+Authorised data sources
+        |
+        v
++----------------------+
+| Ingestion / API      |
++----------+-----------+
+           |
+           v
++----------------------+
+| Normalisation        |
+| Entity Resolution    |
+| Timestamp alignment  |
++----------+-----------+
+           |
+     +-----+-----+
+     |           |
+     v           v
+ Graph Store   Search/Vector Index
+     |           |
+     +-----+-----+
+           |
+           v
++----------------------+
+| Risk & Anomaly Layer |
+| - overlap            |
+| - centrality         |
+| - temporal patterns  |
+| - similarity         |
++----------+-----------+
+           |
+           v
++----------------------+
+| Analyst Workbench    |
+| Search / Graph /     |
+| Timeline / Reports   |
++----------+-----------+
+           |
+           v
++----------------------+
+| Audit Log + RBAC     |
++----------------------+
+
+Important: intelligence scoring is a lead-prioritisation aid, not an automated attribution or guilt determination.

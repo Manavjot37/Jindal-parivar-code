@@ -1,0 +1,201 @@
+{
+  "cases": [
+    {
+      "id": "C001",
+      "name": "Operation Northstar",
+      "priority": "HIGH",
+      "score": 86,
+      "lead": "nightmarket_17",
+      "sources": 4,
+      "entities": 6,
+      "updated": "2026-08-23 12:41"
+    },
+    {
+      "id": "C002",
+      "name": "Blue Orbit Review",
+      "priority": "MEDIUM",
+      "score": 71,
+      "lead": "blueorbit",
+      "sources": 3,
+      "entities": 5,
+      "updated": "2026-08-23 11:18"
+    },
+    {
+      "id": "C003",
+      "name": "Green Parcel Cluster",
+      "priority": "CRITICAL",
+      "score": 93,
+      "lead": "greenparcel",
+      "sources": 5,
+      "entities": 8,
+      "updated": "2026-08-23 10:07"
+    },
+    {
+      "id": "C004",
+      "name": "Silent Node Check",
+      "priority": "LOW",
+      "score": 42,
+      "lead": "silentnode",
+      "sources": 2,
+      "entities": 3,
+      "updated": "2026-08-23 09:32"
+    }
+  ],
+  "entities": [
+    {
+      "id": "E01",
+      "name": "nightmarket_17",
+      "type": "Alias",
+      "risk": 86,
+      "first_seen": "2026-08-10",
+      "last_seen": "2026-08-23"
+    },
+    {
+      "id": "E02",
+      "name": "blueorbit",
+      "type": "Alias",
+      "risk": 71,
+      "first_seen": "2026-08-14",
+      "last_seen": "2026-08-23"
+    },
+    {
+      "id": "E03",
+      "name": "greenparcel",
+      "type": "Alias",
+      "risk": 93,
+      "first_seen": "2026-08-07",
+      "last_seen": "2026-08-23"
+    },
+    {
+      "id": "E04",
+      "name": "silentnode",
+      "type": "Alias",
+      "risk": 42,
+      "first_seen": "2026-08-18",
+      "last_seen": "2026-08-22"
+    },
+    {
+      "id": "E05",
+      "name": "wallet_X1",
+      "type": "Identifier",
+      "risk": 79,
+      "first_seen": "2026-08-11",
+      "last_seen": "2026-08-23"
+    },
+    {
+      "id": "E06",
+      "name": "wallet_X2",
+      "type": "Identifier",
+      "risk": 88,
+      "first_seen": "2026-08-09",
+      "last_seen": "2026-08-23"
+    },
+    {
+      "id": "E07",
+      "name": "dropzone_4",
+      "type": "Location label",
+      "risk": 67,
+      "first_seen": "2026-08-12",
+      "last_seen": "2026-08-22"
+    },
+    {
+      "id": "E08",
+      "name": "vendor_cluster_9",
+      "type": "Cluster",
+      "risk": 91,
+      "first_seen": "2026-08-08",
+      "last_seen": "2026-08-23"
+    }
+  ],
+  "links": [
+    [
+      "E01",
+      "E05",
+      "shared identifier",
+      0.78
+    ],
+    [
+      "E01",
+      "E07",
+      "location reference",
+      0.64
+    ],
+    [
+      "E02",
+      "E05",
+      "shared identifier",
+      0.73
+    ],
+    [
+      "E02",
+      "E08",
+      "cluster association",
+      0.61
+    ],
+    [
+      "E03",
+      "E06",
+      "shared identifier",
+      0.89
+    ],
+    [
+      "E03",
+      "E08",
+      "cluster association",
+      0.94
+    ],
+    [
+      "E04",
+      "E07",
+      "location reference",
+      0.31
+    ],
+    [
+      "E05",
+      "E08",
+      "network association",
+      0.72
+    ]
+  ],
+  "timeline": [
+    {
+      "time": "09:12",
+      "event": "New synthetic alias observed",
+      "entity": "greenparcel",
+      "confidence": 0.91
+    },
+    {
+      "time": "09:48",
+      "event": "Identifier overlap detected",
+      "entity": "wallet_X2",
+      "confidence": 0.88
+    },
+    {
+      "time": "10:07",
+      "event": "Cluster convergence alert",
+      "entity": "vendor_cluster_9",
+      "confidence": 0.94
+    },
+    {
+      "time": "11:18",
+      "event": "Cross-source match",
+      "entity": "blueorbit",
+      "confidence": 0.76
+    },
+    {
+      "time": "12:41",
+      "event": "Network centrality increased",
+      "entity": "greenparcel",
+      "confidence": 0.92
+    }
+  ],
+  "trend": [
+    7,
+    9,
+    12,
+    11,
+    16,
+    19,
+    24
+  ]
+}

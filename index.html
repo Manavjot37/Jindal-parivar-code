@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SentinelTrace V3 - Advanced Intelligence Workbench</title>
+  <style>
+    :root {
+      --bg: #030712;
+      --card-bg: #0b172d;
+      --border: #1e293b;
+      --accent: #38bdf8;
+      --accent-purple: #a855f7;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    header {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    header .logo { font-size: 22px; letter-spacing: 0.5px; }
+    header span { color: var(--accent); }
+    header small { color: var(--muted); font-weight: normal; font-size: 13px; display: block; }
+    .header-actions { display: flex; gap: 10px; }
+
+    .workbench-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 380px;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 1024px) {
+      .workbench-layout { grid-template-columns: 1fr; }
+    }
+
+    .section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 14px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      background: #0284c7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: background 0.2s ease;
+    }
+    .btn:hover { background: #0369a1; }
+    .btn-purple { background: #7c3aed; }
+    .btn-purple:hover { background: #6d28d9; }
+    .btn-secondary { background: #334155; }
+    .btn-secondary:hover { background: #1e293b; }
+    .btn-danger { background: #dc2626; }
+    .btn-danger:hover { background: #b91c1c; }
+
+    .graph-controls {
+      margin-bottom: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    #cy {
+      width: 100%;
+      height: 540px;
+      background: #040914;
+      border: 1px solid #1d4ed8;
+      border-radius: 8px;
+    }
+
+    /* Inspector Styling */
+    .inspector-field {
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+    .inspector-label {
+      color: var(--muted);
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .inspector-input {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #fff;
+      padding: 5px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    /* AI Console Styling */
+    .ai-console {
+      background: #040a17;
+      border: 1px solid #3b82f640;
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+    .ai-chat-history {
+      height: 150px;
+      overflow-y: auto;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 8px;
+      padding-right: 4px;
+    }
+    .chat-msg {
+      padding: 8px 10px;
+      border-radius: 6px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .chat-msg.user {
+      background: #1e293b;
+      color: #f8fafc;
+      align-self: flex-end;
+      border-bottom-right-radius: 1px;
+      max-width: 85%;
+    }
+    .chat-msg.ai {
+      background: #1e1b4b;
+      color: #e9d5ff;
+      border: 1px solid #6b21a8;
+      align-self: flex-start;
+      border-bottom-left-radius: 1px;
+      max-width: 90%;
+    }
+
+    /* Link/Unlink Builder Tool Styling */
+    .link-builder {
+      background: #040a17;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    /* Tables & Alerts */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-size: 11px; text-transform: uppercase; }
+    .alert { padding: 8px; border-bottom: 1px solid var(--border); font-size: 13px; }
+
+    /* Alert Banner */
+    .alert-box {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #0f172a;
+      color: #38bdf8;
+      border: 1px solid #0284c7;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      z-index: 9999;
+      transition: opacity 0.3s ease;
+    }
+    .alert-box.hidden { opacity: 0; pointer-events: none; }
+    .alert-box.flash { animation: pulse-flash 0.6s infinite alternate; }
+    .alert-dot { width: 8px; height: 8px; background-color: #38bdf8; border-radius: 50%; }
+
+    @keyframes pulse-flash {
+      0% { box-shadow: 0 0 5px #0284c7; }
+      100% { box-shadow: 0 0 20px #38bdf8; background-color: #1e293b; }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
+</head>
+<body>
+
+  <div id="intelligence-alert" class="alert-box hidden">
+    <span class="alert-dot"></span>
+    <span id="alert-text">New Intelligence Injected</span>
+  </div>
+
+  <header>
+    <div>
+      <div class="logo">SENTINEL<span>TRACE</span> V3</div>
+      <small>Advanced Hierarchy, Pathfinding & Intelligence Workbench</small>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-purple" onclick="openIntelModal()">+ Add Intelligence Entry</button>
+      <button class="btn btn-secondary" onclick="window.print()">Export Case Brief (PDF)</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="workbench-layout">
+      <!-- Main Graph Section -->
+      <section class="section" style="margin-bottom:0;">
+        <h2>
+          Entity Relationship & Hierarchy Graph
+          <span style="font-size: 11px; color: var(--muted); font-weight: normal;">Node Count: <span id="node-count">0</span></span>
+        </h2>
+        <div class="graph-controls">
+          <button id="btn-fit" class="btn" onclick="if(window.cyInstance) window.cyInstance.fit();">Fit View</button>
+          <button id="btn-layout" class="btn btn-secondary" onclick="changeLayout(document.getElementById('layoutSelect').value)">Rearrange</button>
+          
+          <label style="color: #94a3b8; font-size: 12px; margin-left: 5px;">Layout Hierarchy:</label>
+          <select id="layoutSelect" class="inspector-input" style="width: 130px; display: inline-block;" onchange="changeLayout(this.value)">
+            <option value="cose">Network (Force)</option>
+            <option value="breadthfirst">Hierarchy (Tree)</option>
+            <option value="concentric">Concentric (Rings)</option>
+            <option value="grid">Grid Structure</option>
+          </select>
+
+          <label style="color: #94a3b8; font-size: 12px; margin-left: auto;">Min Risk Filter:</label>
+          <input type="range" id="risk-slider" min="0" max="100" value="0" style="cursor: pointer;" oninput="filterByRisk(this.value)">
+          <span id="risk-val" style="color: #38bdf8; font-weight: bold; font-size: 12px;">0</span>
+        </div>
+        <div id="cy"></div>
+      </section>
+
+      <!-- Entity Inspector & Link Tools -->
+      <section class="section" style="background: #081226; margin-bottom:0; display: flex; flex-direction: column;">
+        <h2>Entity Inspector & Editor</h2>
+        <div id="inspector-content" style="flex: 1; min-height: 110px;">
+          <p style="color: var(--muted); font-size: 12px;">Click any graph node to inspect, edit parameters, or disconnect all links.</p>
+        </div>
+
+        <!-- Manual Link & Unlink Tool -->
+        <div class="link-builder">
+          <div style="font-size: 11px; font-weight: bold; color: var(--accent); margin-bottom: 6px;">
+            🔗 MANUALLY CONNECT / DISCONNECT NODES
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px;">
+            <select id="linkSource" class="inspector-input"><option value="">Source Node</option></select>
+            <select id="linkTarget" class="inspector-input"><option value="">Target Node</option></select>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button onclick="createManualEdge()" class="btn" style="flex: 1; padding: 4px; font-size: 11px;">Connect</button>
+            <button onclick="disconnectSpecificEdge()" class="btn btn-danger" style="flex: 1; padding: 4px; font-size: 11px;">Disconnect 2 Nodes</button>
+          </div>
+        </div>
+
+        <!-- AI Copilot with Path Analysis -->
+        <div class="ai-console">
+          <div style="font-size: 11px; font-weight: bold; color: var(--accent-purple); margin-bottom: 6px; display: flex; align-items: center; gap: 5px;">
+            ⚡ AI PATH FINDER & INVESTIGATOR
+          </div>
+          <div class="ai-chat-history" id="ai-chat">
+            <div class="chat-msg ai">Ask about paths (e.g. <i>"connection between E01 and E08"</i>) or specific entity details.</div>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="ai-input" placeholder="e.g. how is E03 connected to E08?" style="flex: 1; background: #0f172a; border: 1px solid #334155; border-radius: 4px; padding: 6px; color: white; font-size: 11px;" onkeypress="if(event.key==='Enter') askAIAssistant()" />
+            <button onclick="askAIAssistant()" class="btn btn-purple" style="padding: 4px 8px; font-size: 11px;">Ask</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Tables Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+      <section class="section">
+        <h2>Risk-Ranked Suspect Cases</h2>
+        <div id="cases"></div>
+      </section>
+
+      <section class="section">
+        <h2>Live Intelligence Alerts</h2>
+        <div id="alerts"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ADD INTELLIGENCE MODAL -->
+  <div id="intelModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); z-index: 9999; align-items: center; justify-content: flex-end;">
+    <div style="width: 440px; background-color: #0f172a; border-left: 1px solid #1e293b; height: 100%; padding: 24px; box-shadow: -10px 0 25px rgba(0,0,0,0.5); overflow-y: auto; color: #ffffff;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 20px;">
+        <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #38bdf8; text-transform: uppercase;">
+          Add Intelligence Entry
+        </h3>
+        <button onclick="closeIntelModal()" style="background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer;">✕</button>
+      </div>
+
+      <form id="intelForm" onsubmit="handleIntelSubmit(event)" style="display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label style="font-size: 12px; color: #cbd5e1;">Raw Intercept / Evidence Dump</label>
+            <button type="button" onclick="runAIExtraction()" class="btn btn-purple" style="font-size: 10px; padding: 3px 8px;">
+              ⚡ Auto-Extract via AI
+            </button>
+          </div>
+          <textarea id="nodeNotes" rows="3" placeholder="Paste chat log, transaction hashes, or drop coordinates..." style="width: 100%; background: #1e293b; border: 1px solid #334155; border-radius: 4px; padding: 8px; color: white; font-size: 12px;"></textarea>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 12px; color: #cbd5e1; margin-bottom: 6px;">Entity Alias / Handle / Wallet</label>
+          <input type="text" id="nodeAlias" required placeholder="e.g., sector17_vendor" style="width: 100%; background: #1e293b; border: 1px solid #334155; border-radius: 4px; padding: 8px; color: white; font-size: 12px;" />
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 12px; color: #cbd5e1; margin-bottom: 6px;">Hierarchy / Parent Entity (Optional)</label>
+          <select id="parentTarget" style="width: 100%; background: #1e293b; border: 1px solid #334155; border-radius: 4px; padding: 8px; color: white; font-size: 12px;">
+            <option value="NONE">-- Top Level / Standalone Node --</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 12px; color: #cbd5e1; margin-bottom: 6px;">Connect Edge To Node (Optional)</label>
+          <select id="connectedTarget" style="width: 100%; background: #1e293b; border: 1px solid #334155; border-radius: 4px; padding: 8px; color: white; font-size: 12px;">
+          </select>
+        </div>
+
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+            <span style="color: #cbd5e1;">Initial Threat Score</span>
+            <span id="riskDisplay" style="color: #38bdf8; font-weight: bold;">75 / 100</span>
+          </div>
+          <input type="range" id="nodeRisk" min="1" max="100" value="75" oninput="document.getElementById('riskDisplay').innerText = this.value + ' / 100'" style="width: 100%; accent-color: #06b6d4; cursor: pointer;" />
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 10px;">
+          <button type="button" onclick="closeIntelModal()" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+          <button type="submit" class="btn btn-purple" style="flex: 1;">Inject Node</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Global State
+    window.D = {
+      selectedNodeId: null,
+      selectedNodeData: null,
+      cases: [
+        { alias: 'Anubhav', platform: 'Injected Node', risk: 100 },
+        { alias: 'vendor_cluster_8', platform: 'Consolidated Syndicate', risk: 95 },
+        { alias: 'greenparcel', platform: 'DarkNet', risk: 93 },
+        { alias: 'nightmarket_17', platform: 'Telegram', risk: 86 }
+      ],
+      alerts: [
+        { timestamp: '10:42 AM', text: 'Mixer activity flagged on Wallet_X1' },
+        { timestamp: '10:58 AM', text: 'New suspect node initialized manually' }
+      ]
+    };
+
+    function getTypeFromRisk(risk) {
+      if (risk >= 90) return 'critical';
+      if (risk >= 75) return 'high';
+      if (risk >= 50) return 'medium';
+      return 'low';
+    }
+
+    function triggerToast(text) {
+      const alertBox = document.getElementById('intelligence-alert');
+      const alertText = document.getElementById('alert-text');
+      if (alertBox && alertText) {
+        alertText.textContent = text;
+        alertBox.classList.remove('hidden');
+        alertBox.classList.add('flash');
+        setTimeout(() => {
+          alertBox.classList.remove('flash');
+          alertBox.classList.add('hidden');
+        }, 4000);
+      }
+    }
+
+    function populateNodeDropdowns() {
+      if (!window.cyInstance) return;
+      
+      const nodes = window.cyInstance.nodes();
+      const nodeOptions = nodes.map(n => {
+        const cleanName = n.data('label') ? n.data('label').split('\n')[0] : n.id();
+        return `<option value="${n.id()}">${cleanName} [ID: ${n.id()}]</option>`;
+      }).join('');
+
+      const connectSelect = document.getElementById('connectedTarget');
+      const parentSelect = document.getElementById('parentTarget');
+      if (connectSelect) {
+        connectSelect.innerHTML = `<option value="NONE">-- Standalone Node (No Direct Link) --</option>` + nodeOptions;
+      }
+      if (parentSelect) {
+        parentSelect.innerHTML = `<option value="NONE">-- Top Level / Standalone Node --</option>` + nodeOptions;
+      }
+
+      const src = document.getElementById('linkSource');
+      const tgt = document.getElementById('linkTarget');
+      if (src && tgt) {
+        src.innerHTML = `<option value="">Source Node</option>` + nodeOptions;
+        tgt.innerHTML = `<option value="">Target Node</option>` + nodeOptions;
+      }
+    }
+
+    function openIntelModal() {
+      populateNodeDropdowns();
+      document.getElementById('intelModal').style.display = 'flex';
+    }
+
+    function closeIntelModal() {
+      document.getElementById('intelModal').style.display = 'none';
+    }
+
+    function changeLayout(layoutName) {
+      if (!window.cyInstance) return;
+      const opts = { name: layoutName, animate: true };
+      if (layoutName === 'breadthfirst') opts.directed = true;
+      window.cyInstance.layout(opts).run();
+      triggerToast(`Layout changed to ${layoutName.toUpperCase()}`);
+    }
+
+    function filterByRisk(val) {
+      document.getElementById('risk-val').innerText = val;
+      if (!window.cyInstance) return;
+      
+      window.cyInstance.nodes().forEach(node => {
+        const risk = node.data('risk') || 0;
+        if (risk < parseInt(val)) {
+          node.style('display', 'none');
+        } else {
+          node.style('display', 'element');
+        }
+      });
+    }
+
+    function createManualEdge() {
+      const source = document.getElementById('linkSource').value;
+      const target = document.getElementById('linkTarget').value;
+
+      if (!source || !target) return alert('Select both a Source and Target node!');
+      if (source === target) return alert('Cannot connect a node to itself!');
+
+      if (window.cyInstance) {
+        window.cyInstance.add({
+          group: 'edges',
+          data: { source: source, target: target, weight: 3 }
+        });
+        const currentLayout = document.getElementById('layoutSelect').value || 'cose';
+        window.cyInstance.layout({ name: currentLayout, animate: true }).run();
+        triggerToast("Connected Nodes Successfully!");
+      }
+    }
+
+    function disconnectSpecificEdge() {
+      const source = document.getElementById('linkSource').value;
+      const target = document.getElementById('linkTarget').value;
+
+      if (!source || !target) return alert('Select both a Source and Target node to disconnect!');
+
+      if (window.cyInstance) {
+        const edges = window.cyInstance.edges().filter(e => {
+          return (e.data('source') === source && e.data('target') === target) ||
+                 (e.data('source') === target && e.data('target') === source);
+        });
+
+        if (edges.length === 0) {
+          alert('No direct connection found between these two nodes.');
+        } else {
+          edges.remove();
+          triggerToast(`Disconnected ${source} and ${target}`);
+        }
+      }
+    }
+
+    function removeNodeEdges() {
+      if (!window.D.selectedNodeId || !window.cyInstance) return;
+      const node = window.cyInstance.getElementById(window.D.selectedNodeId);
+      if (node) {
+        node.connectedEdges().remove();
+        triggerToast("Disconnected all links for node");
+      }
+    }
+
+    function applyInspectorChanges() {
+      if (!window.D.selectedNodeId || !window.cyInstance) return;
+      const node = window.cyInstance.getElementById(window.D.selectedNodeId);
+      if (node) {
+        const alias = document.getElementById('editAlias').value.trim();
+        const risk = parseInt(document.getElementById('editRisk').value);
+        const wallet = document.getElementById('editWallet').value.trim();
+        const driver = document.getElementById('editDriver').value.trim();
+
+        const riskType = getTypeFromRisk(risk);
+
+        node.data({
+          label: `${alias}\n(${risk})`,
+          risk: risk,
+          type: riskType,
+          wallet: wallet,
+          driver: driver
+        });
+
+        triggerToast(`Updated Node: ${alias}`);
+        window.cyInstance.style().update();
+      }
+    }
+
+    function askAIAssistant() {
+      const input = document.getElementById('ai-input');
+      const query = input.value.trim();
+      if (!query) return;
+
+      const chat = document.getElementById('ai-chat');
+      chat.innerHTML += `<div class="chat-msg user">${query}</div>`;
+      input.value = '';
+      chat.scrollTop = chat.scrollHeight;
+
+      setTimeout(() => {
+        let response = "";
+        const queryLower = query.toLowerCase();
+        const nodes = window.cyInstance ? window.cyInstance.nodes() : [];
+
+        const nodeIds = nodes.map(n => n.id());
+        const nodeAliases = nodes.map(n => ({ id: n.id(), alias: (n.data('label')||'').split('\n')[0].toLowerCase() }));
+
+        let sourceId = null, targetId = null;
+
+        nodeIds.forEach(id => {
+          if (queryLower.includes(id.toLowerCase())) {
+            if (!sourceId) sourceId = id;
+            else if (!targetId && id !== sourceId) targetId = id;
+          }
+        });
+
+        if (!sourceId || !targetId) {
+          nodeAliases.forEach(item => {
+            if (queryLower.includes(item.alias)) {
+              if (!sourceId) sourceId = item.id;
+              else if (!targetId && item.id !== sourceId) targetId = item.id;
+            }
+          });
+        }
+
+        if ((queryLower.includes("connect") || queryLower.includes("path") || queryLower.includes("between") || queryLower.includes("link")) && sourceId && targetId) {
+          window.cyInstance.elements().removeClass('highlighted');
+          
+          const bfs = window.cyInstance.elements().aStar({ root: `#${sourceId}`, target: `#${targetId}` });
+
+          if (bfs.found) {
+            const pathNames = bfs.path.nodes().map(n => n.data('label').split('\n')[0]);
+            
+            bfs.path.style({
+              'line-color': '#ef4444',
+              'target-arrow-color': '#ef4444',
+              'width': 5
+            });
+
+            response = `<b>[PATH ANALYSIS]</b> Connection found between <b>${sourceId}</b> and <b>${targetId}</b>!<br>` +
+              `• <b>Hops:</b> ${bfs.distance}<br>` +
+              `• <b>Path Trace:</b> ${pathNames.join(' ➔ ')}`;
+          } else {
+            response = `<b>[PATH ANALYSIS]</b> No direct or indirect path found between <b>${sourceId}</b> and <b>${targetId}</b>. They are currently disconnected.`;
+          }
+        } 
+        else {
+          const matchedNode = nodes.toArray().find(n => {
+            const cleanLabel = (n.data('label') || '').split('\n')[0].toLowerCase();
+            return queryLower.includes(cleanLabel) || queryLower.includes(n.id().toLowerCase());
+          });
+
+          if (matchedNode) {
+            const data = matchedNode.data();
+            const cleanName = data.label.split('\n')[0];
+            response = `<b>[ENTITY REPORT: ${cleanName}]</b><br>` +
+              `• <b>Node ID:</b> ${data.id}<br>` +
+              `• <b>Threat Score:</b> <span style="color:${data.risk >= 80 ? '#ef4444' : '#f59e0b'};">${data.risk}/100</span><br>` +
+              `• <b>Wallet:</b> ${data.wallet || 'N/A'}<br>` +
+              `• <b>Risk Driver:</b> ${data.driver || 'No explicit flag.'}`;
+          } else {
+            response = `Specify two entities to calculate path (e.g. <i>"connection between E01 and E08"</i>) or ask about high-risk hubs.`;
+          }
+        }
+
+        chat.innerHTML += `<div class="chat-msg ai">${response}</div>`;
+        chat.scrollTop = chat.scrollHeight;
+      }, 400);
+    }
+
+    function runAIExtraction() {
+      const notes = document.getElementById('nodeNotes').value.trim();
+      if (!notes) return alert("Paste evidence text first!");
+
+      const btn = event.target;
+      btn.innerText = "Analyzing...";
+      btn.disabled = true;
+
+      setTimeout(() => {
+        let detectedAlias = "suspect_" + Math.floor(100 + Math.random() * 900);
+        let score = 70;
+
+        if (notes.toLowerCase().includes("btc") || notes.toLowerCase().includes("0x")) { score += 15; }
+        if (notes.toLowerCase().includes("escrow") || notes.toLowerCase().includes("darknet")) { score += 20; }
+        
+        const handleMatch = notes.match(/@([a-zA-Z0-9_]+)/) || notes.match(/alias:\s*([a-zA-Z0-9_]+)/i);
+        if (handleMatch) detectedAlias = handleMatch[1];
+
+        document.getElementById('nodeAlias').value = detectedAlias;
+        document.getElementById('nodeRisk').value = Math.min(score, 100);
+        document.getElementById('riskDisplay').innerText = Math.min(score, 100) + ' / 100';
+
+        btn.innerText = "⚡ Auto-Extract via AI";
+        btn.disabled = false;
+        triggerToast("AI Extracted Entity: " + detectedAlias);
+      }, 600);
+    }
+
+    function handleIntelSubmit(event) {
+      if (event) event.preventDefault();
+
+      const alias = document.getElementById('nodeAlias').value.trim();
+      const parentId = document.getElementById('parentTarget').value;
+      const targetId = document.getElementById('connectedTarget').value;
+      const risk = parseInt(document.getElementById('nodeRisk').value);
+      const notes = document.getElementById('nodeNotes').value.trim();
+
+      if (!alias) return alert('Please enter an Entity Alias!');
+
+      const newNodeId = 'E_' + Date.now().toString().slice(-4);
+      const riskType = getTypeFromRisk(risk);
+
+      if (window.cyInstance) {
+        const nodeObj = {
+          group: 'nodes',
+          data: {
+            id: newNodeId,
+            label: `${alias}\n(${risk})`,
+            risk: risk,
+            type: riskType,
+            wallet: alias.startsWith('0x') || alias.startsWith('bc1') ? alias : 'N/A',
+            driver: notes || 'Manual Intelligence Injection'
+          }
+        };
+
+        if (parentId && parentId !== 'NONE') {
+          nodeObj.data.parent = parentId;
+        }
+
+        window.cyInstance.add(nodeObj);
+
+        if (targetId && targetId !== 'NONE') {
+          window.cyInstance.add({
+            group: 'edges',
+            data: { source: newNodeId, target: targetId, weight: 3 }
+          });
+        }
+
+        const currentLayout = document.getElementById('layoutSelect').value || 'cose';
+        window.cyInstance.layout({ name: currentLayout, animate: true }).run();
+        document.getElementById('node-count').innerText = window.cyInstance.nodes().length;
+        populateNodeDropdowns();
+      }
+
+      window.D.cases.push({ alias, platform: 'Injected Node', risk });
+      drawCases();
+
+      closeIntelModal();
+      document.getElementById('intelForm').reset();
+      triggerToast(`Injected entity: ${alias} [${newNodeId}]`);
+    }
+
+    function drawCases() {
+      const el = document.getElementById('cases');
+      if (el && window.D.cases) {
+        el.innerHTML = `<table>
+          <tr><th>Alias</th><th>Platform</th><th>Risk Score</th></tr>
+          ${window.D.cases.sort((a,b)=>b.risk-a.risk).map(c => `
+            <tr>
+              <td><b>${c.alias}</b></td>
+              <td>${c.platform}</td>
+              <td style="color:${c.risk>=80?'#ef4444':'#f59e0b'};font-weight:bold;">${c.risk}/100</td>
+            </tr>
+          `).join('')}
+        </table>`;
+      }
+    }
+
+    function drawAlerts() {
+      const el = document.getElementById('alerts');
+      if (el && window.D.alerts) {
+        el.innerHTML = window.D.alerts.map(a => `
+          <div class="alert"><b>[${a.timestamp}]:</b> ${a.text}</div>
+        `).join('');
+      }
+    }
+
+    function drawGraph() {
+      const elementsData = [
+        { data: { id: 'E01', label: 'nightmarket_17\n(86)', risk: 86, type: 'high', wallet: 'bc1q...99a1', driver: 'High-volume transaction velocity' } },
+        { data: { id: 'E02', label: 'blueorbit\n(71)', risk: 71, type: 'medium', wallet: '0x4f...a812', driver: 'Cross-platform alias match' } },
+        { data: { id: 'E03', label: 'greenparcel\n(93)', risk: 93, type: 'critical', wallet: 'bc1q...x204', driver: 'Direct connection to illicit escrow hub' } },
+        { data: { id: 'E04', label: 'silentnode\n(42)', risk: 42, type: 'low', wallet: 'N/A', driver: 'Intermittent activity' } },
+        { data: { id: 'E05', label: 'wallet_X1\n(78)', risk: 78, type: 'high', wallet: 'bc1q...3398', driver: 'Mixer interaction detected' } },
+        { data: { id: 'E06', label: 'wallet_X2\n(82)', risk: 82, type: 'high', wallet: '3J98...tP11', driver: 'High frequency laundering pattern' } },
+        { data: { id: 'E07', label: 'dropzone_4\n(35)', risk: 35, type: 'low', wallet: 'N/A', driver: 'Single mention in feed' } },
+        { data: { id: 'E08', label: 'vendor_cluster_8\n(95)', risk: 95, type: 'critical', wallet: 'bc1q...88f2', driver: 'Multi-entity convergence hub' } },
+
+        { data: { source: 'E01', target: 'E04', weight: 1 } },
+        { data: { source: 'E01', target: 'E05', weight: 3 } },
+        { data: { source: 'E02', target: 'E05', weight: 2 } },
+        { data: { source: 'E02', target: 'E08', weight: 4 } },
+        { data: { source: 'E03', target: 'E06', weight: 5 } },
+        { data: { source: 'E04', target: 'E07', weight: 1 } },
+        { data: { source: 'E05', target: 'E08', weight: 4 } },
+        { data: { source: 'E06', target: 'E08', weight: 5 } }
+      ];
+
+      const cyContainer = document.getElementById('cy');
+      if (!cyContainer) return;
+
+      window.cyInstance = cytoscape({
+        container: cyContainer,
+        elements: elementsData,
+        style: [
+          {
+            selector: 'node',
+            style: {
+              'label': 'data(label)',
+              'color': '#ffffff',
+              'font-size': '10px',
+              'text-valign': 'center',
+              'text-halign': 'center',
+              'text-wrap': 'wrap',
+              'width': '60px',
+              'height': '60px',
+              'border-width': 2,
+              'border-color': '#ffffff'
+            }
+          },
+          { selector: 'node[type="critical"]', style: { 'background-color': '#ef4444' } },
+          { selector: 'node[type="high"]', style: { 'background-color': '#f59e0b' } },
+          { selector: 'node[type="medium"]', style: { 'background-color': '#3b82f6' } },
+          { selector: 'node[type="low"]', style: { 'background-color': '#06b6d4' } },
+          {
+            selector: 'edge',
+            style: {
+              'width': 'mapData(weight, 1, 5, 1.5, 4.5)',
+              'line-color': '#38bdf8',
+              'curve-style': 'bezier',
+              'opacity': 0.7
+            }
+          }
+        ],
+        layout: { name: 'cose', animate: false }
+      });
+
+      document.getElementById('node-count').innerText = window.cyInstance.nodes().length;
+      populateNodeDropdowns();
+
+      // Inspector selection tap
+      window.cyInstance.on('tap', 'node', function(evt){
+        const data = evt.target.data();
+        window.D.selectedNodeId = data.id;
+        window.D.selectedNodeData = data;
+        const cleanAlias = data.label ? data.label.split('\n')[0] : data.id;
+
+        const inspector = document.getElementById('inspector-content');
+        
+        inspector.innerHTML = `
+          <div class="inspector-field">
+            <span class="inspector-label">Entity Alias / Handle</span>
+            <input type="text" id="editAlias" class="inspector-input" value="${cleanAlias}" />
+          </div>
+          <div class="inspector-field">
+            <span class="inspector-label">Threat Level Score (1-100)</span>
+            <input type="number" id="editRisk" class="inspector-input" value="${data.risk || 0}" min="1" max="100" />
+          </div>
+          <div class="inspector-field">
+            <span class="inspector-label">Associated Wallet</span>
+            <input type="text" id="editWallet" class="inspector-input" value="${data.wallet || 'N/A'}" />
+          </div>
+          <div class="inspector-field">
+            <span class="inspector-label">Primary Risk Driver</span>
+            <input type="text" id="editDriver" class="inspector-input" value="${data.driver || 'N/A'}" />
+          </div>
+          <div style="display: flex; gap: 6px; margin-top: 10px;">
+            <button onclick="applyInspectorChanges()" class="btn" style="flex: 1; font-size: 11px;">Save Changes</button>
+            <button onclick="removeNodeEdges()" class="btn btn-danger" style="flex: 1; font-size: 11px;">Disconnect All Links</button>
+          </div>
+        `;
+      });
+    }
+
+    // Initialize application on DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+      drawGraph();
+      drawCases();
+      drawAlerts();
+    });
+  </script>
+</body>
+</html>
